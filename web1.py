@@ -45,7 +45,7 @@ def get_login_sessions():
     csrfToken = soup.find('input', {'id':'csrfToken'})["value"]
     csrfToken=csrfToken.encode("utf-8")
     #2 get init_js
-    init_js_url="https://192.168.20.1:8443/console/scripts/ajaxswing/AjaxSwing_init.js"
+    init_js_url="https://%s:8443/console/scripts/ajaxswing/AjaxSwing_init.js" % server_ip
     req_2 = s.get(init_js_url,proxies=proxies,headers=headers,verify=False)
     for i in req_1.headers["Set-Cookie"].split(";"):
         if "JSESSIONID"  in i :
@@ -157,6 +157,7 @@ def get_login_sessions():
 
     print "cookieTest=true;%s;ssc=1;%s"%(JSESSIONID,PHPSESSID)
     return csrfToken,componentId
+
 '''
 def init_do():
     post_url_local="https://192.168.20.1:8443/console/apps/sepm?do" 
@@ -166,19 +167,28 @@ def init_do():
         'csrfToken':'%s',
     }%csrfToken
 '''
-'''
+
+def keep_alive(csrfToken):
+    post_url = "https://%s:8443/console/apps/sepm" % server_ip
+    data = {
+        'keepSessionAlive' : 'true',
+        '__Action' : 'ping',
+        '__FastSubmit' : 'true',
+        '__csrfToken' : csrfToken
+    }
+    s.post(post_url, data=data, headers=headers, verify=False)
+
 def upload_packages(csrfToken,componentId):
-    #
-    csrfToken=csrfToken
-    componentId=componentId 
-    POST https://192.168.20.1:8443/console/apps/sepm HTTP/1.1
-    actionString=%2Fcontext%2FMainFrame_371810894%2F520_437%23n&__Action=v4&__FastSubmit=true&__csrfToken=9MHpxqAKrWBsqKmvNtpe
-    '''
+    print s.cookies
+    while(True):
+        time.sleep(1)
+        keep_alive(csrfToken=csrfToken)
+
 
     
 if __name__ == '__main__':
     csrfToken,componentId=get_login_sessions()
-    #upload_packages(csrfToken,componentId)
+    upload_packages(csrfToken,componentId)
     
 
 
