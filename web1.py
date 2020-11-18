@@ -252,7 +252,7 @@ def upload_file(csrfToken):
     print "4. input package name"
     # click input box
     data = {
-        'actionString' : '/click/%s/62_78#n' % creat_new_software_dlg_id,
+        'actionString' : '/click/%s/73_77#n' % creat_new_software_dlg_id,
         'postActions[]' : '/caret/%s/0' % jtext_field_id,
         '__Action' : 'v4',
         '__FastSubmit' : 'true',
@@ -271,8 +271,7 @@ def upload_file(csrfToken):
 
     print "5. create select file windows"
     data = {
-        'actionString' : '/click/%s/293_132#n' % jtext_field_id,
-        'storedActions[]' : '/type/%s/thisisatestpackage' % jtext_field_id,
+        'actionString' : '/click/%s/295_133#n' % creat_new_software_dlg_id,
         '__Action' : 'v4',
         '__FastSubmit' : 'true',
         '__csrfToken' : csrfToken
