@@ -218,7 +218,7 @@ def upload_file(csrfToken):
         '__FastSubmit' : 'true',
         '__csrfToken' : csrfToken
     }
-    s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False)
+    s.post(post_url, data=data, headers=headers, verify=False)
     time.sleep(2)
 
     print "3. click add package"
