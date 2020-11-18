@@ -142,7 +142,7 @@ def get_login_sessions():
     login_data_4["actionString"]="/keydown/"+SEPMPasswordField+"/n_13_1"
     login_data_4["storedActions[]"]="/type/"+SEPMPasswordField+"/Admin@123"
     login_data_4=s.post(default_url_local_2,data=login_data_4,proxies={},headers=headers,verify=False)
-    time.sleep(10)
+    time.sleep(15)
 
     login_data_5= s.get(default_url_local_2,headers=headers,verify=False)
     #print login_data_5.text
@@ -210,6 +210,7 @@ def upload_file(csrfToken):
         '__csrfToken' : '%s' % csrfToken
     }
     s.post(post_url, data=body_data1, headers=headers, verify=False)
+    time.sleep(2)
 
     print "2. click install package"
     data = {
@@ -218,34 +219,36 @@ def upload_file(csrfToken):
         '__FastSubmit' : 'true',
         '__csrfToken' : csrfToken
     }
+
+    data1 = {
+        'actionString' : '/update/global/',
+        '__Action' : 'v4',
+        '__FastSubmit' : 'true',
+        '__csrfToken' : csrfToken
+    }
+
     s.post(post_url, data=data, headers=headers, verify=False)
     time.sleep(2)
+    s.post(post_url, data=data1, headers=headers, verify=False)
+    time.sleep(2)
+
 
     print "3. click add package"
 
     data = {
-        'actionString' : '/click/%s/164_615#n' % main_frame_id,
+        'actionString' : '/click/%s/190_612#n' % main_frame_id,
         '__Action' : 'v4',
         '__FastSubmit' : 'true',
         '__csrfToken' : csrfToken
     }
 
-    data_init = {
-        'actionString' : '/context/%s/1_1#n' % main_frame_id,
-        '__Action' : 'v4',
-        '__FastSubmit' : 'true',
-        '__csrfToken' : csrfToken
-    }
-    s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False).text
-    response_json = s.post(post_url, data=data_init, proxies=proxies, headers=headers, verify=False).text
+    response_json = s.post(post_url, data=data, headers=headers, verify=False).text
     creat_new_software_dlg_id = json.loads(response_json)['activeWindowId']
     jtext_field_id = json.loads(response_json)['focusedComponentId']
-
 
     print jtext_field_id
     print creat_new_software_dlg_id
 
-    '''
     print "4. input package name"
     # click input box
     data = {
@@ -278,8 +281,6 @@ def upload_file(csrfToken):
 
 
 
-
-'''
     
 if __name__ == '__main__':
     csrfToken,componentId=get_login_sessions()
