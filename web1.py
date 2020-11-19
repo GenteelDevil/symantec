@@ -267,7 +267,7 @@ def upload_file(csrfToken):
         '__FastSubmit' : 'true',
         '__csrfToken' : csrfToken
     }
-    s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False)
+    s.post(post_url, data=data, headers=headers, verify=False)
 
     print "5. create select file windows"
     data = {
@@ -276,14 +276,41 @@ def upload_file(csrfToken):
         '__FastSubmit' : 'true',
         '__csrfToken' : csrfToken
     }
-    s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False)
+    result = s.post(post_url, data=data, headers=headers, verify=False).text
+    jfile_choose_id = re.findall("JFileChooser\_[0-9]{9,10}", result)
+    jfile_choose_id = str(jfile_choose_id)
+    print jfile_choose_id
 
+    print "6. upload file cache"
 
+    headers["Sec-Fetch-Dest"] = "document"
+    headers["Accept-Encoding"] = "gzip, deflate"
+
+    file = {
+        "actionString" : "/upload/%s/ok" % jfile_choose_id,
+        "%s" % jtext_field_id : "thisisatestpackage",
+        "__csrfToken" : csrfToken,
+        "upload.file" : open('./type-1.zip', 'rb').read()
+    }
+    s.post(post_url, data=file, proxies=proxies, headers=headers, verify=False)
+
+def test_upload_file():
+    headers["Sec-Fetch-Site"] = "same-origin"
+    headers["Sec-Fetch-Mode"] = "navigate"
+    headers["Sec-Fetch-User"] = "?1"
+    headers["Sec-Fetch-Dest"] = "document"
+    print headers
+    file = {
+        "upload.file" : open("./type-1.zip", "rb")
+    }
+    print "hello"
+    s.post(default_url_local_2, data=file, proxies=proxies, headers=headers, verify=False)
 
     
 if __name__ == '__main__':
-    csrfToken,componentId=get_login_sessions()
-    upload_file(csrfToken=csrfToken)
+    # csrfToken,componentId=get_login_sessions()
+    # upload_file(csrfToken=csrfToken)
+    test_upload_file()
     while True:
         time.sleep(1)
         keep_alive(csrfToken=csrfToken)
