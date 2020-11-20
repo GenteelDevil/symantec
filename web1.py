@@ -7,6 +7,8 @@ import time
 import sys
 import re
 import json
+import string
+import random
 from bs4 import BeautifulSoup
 
 #login_url="https://"+ +"/console/apps/sepm"
@@ -278,39 +280,61 @@ def upload_file(csrfToken):
     }
     result = s.post(post_url, data=data, headers=headers, verify=False).text
     jfile_choose_id = re.findall("JFileChooser\_[0-9]{9,10}", result)
-    jfile_choose_id = str(jfile_choose_id)
+    jfile_choose_id = str(jfile_choose_id[0])
     print jfile_choose_id
-
+    
     print "6. upload file cache"
-
-    headers["Sec-Fetch-Dest"] = "document"
-    headers["Accept-Encoding"] = "gzip, deflate"
-
-    file = {
-        "actionString" : "/upload/%s/ok" % jfile_choose_id,
-        "%s" % jtext_field_id : "thisisatestpackage",
-        "__csrfToken" : csrfToken,
-        "upload.file" : open('./type-1.zip', 'rb').read()
+    # change headers
+    chars = string.letters + string.digits
+    rand_str = ''.join([random.choice(chars) for i in range(16)])
+    tmp_header = {
+        "Connection" : "close",
+        "Cache-Control" : "max-age=0",
+        "Upgrade-Insecure-Requests" : "1",
+        "Content-Type" : "multipart/form-data; boundary=----WebKitFormBoundary%s" % rand_str,
+        "User-Agent" : "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36",
+        "Accept" : "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+        "Sec-Fetch-Site" : "same-origin",
+        "Sec-Fetch-Mode" : "navigate",
+        "Sec-Fetch-User" : "?1",
+        "Sec-Fetch-Dest" : "document",
+        "Accept-Encoding" : "gzip, deflate",
+        "Accept-Language" : "en-US,en;q=0.5"
     }
-    s.post(post_url, data=file, proxies=proxies, headers=headers, verify=False)
+    headers['Content-Type'] = 'multipart/form-data; boundary=----WebKitFormBoundary%s' % rand_str
+    files = {
+        "upload.file" : (
+            "type-1.zip",
+            open('./type-1.zip', 'rb'),
+            "application/zip"
+        )
+    }
+    datas = {
+        "__csrfToken" : (csrfToken),
+        jtext_field_id : ("thisisatestpackage"),
+        "actionString" : ("/upload/%s/ok" % jfile_choose_id[0])
+    }
+    s.post(post_url, data=datas, files=files, proxies=proxies, headers=headers, verify=False)
 
 def test_upload_file():
-    headers["Sec-Fetch-Site"] = "same-origin"
-    headers["Sec-Fetch-Mode"] = "navigate"
-    headers["Sec-Fetch-User"] = "?1"
-    headers["Sec-Fetch-Dest"] = "document"
-    print headers
-    file = {
-        "upload.file" : open("./type-1.zip", "rb")
+    files = {
+        "upload.file" : (
+            "type-1.zip",
+            open('./type-1.zip', 'rb'),
+            "application/zip"
+        )
     }
-    print "hello"
-    s.post(default_url_local_2, data=file, proxies=proxies, headers=headers, verify=False)
+    data = {
+        "__csrfToken" : (""),
+        "actionString" : ("/upload/")
+    }
+    s.post(default_url_local_2, data=data, files=files, proxies=proxies, headers=headers, verify=False)
 
     
 if __name__ == '__main__':
-    # csrfToken,componentId=get_login_sessions()
-    # upload_file(csrfToken=csrfToken)
-    test_upload_file()
+    csrfToken,componentId=get_login_sessions()
+    upload_file(csrfToken=csrfToken)
+    #test_upload_file()
     while True:
         time.sleep(1)
         keep_alive(csrfToken=csrfToken)
