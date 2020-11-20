@@ -16,6 +16,8 @@ from requests.models import ContentDecodingError, to_native_string
 login_username=""
 login_password=""
 
+file_path = "./"
+
 main_frame = ""
 #default setting
 server_ip = "172.16.226.20"
@@ -225,37 +227,41 @@ def GenClientsInfo(csrfToken):
             online_clients = len(online_clients)
             offline_clients = len(offline_clients)
             break
-    print "  total clients: %s" % (str(online_clients + offline_clients))
+    total_clients = (online_clients + offline_clients) / 4
+
     # 2. get Clients info
     print "2. get clients info"
-    # click first client
-    data = {
-        'actionString' : '/click/%s/374_255#n' % main_frame_id,
-        '__Action' : 'v4',
-        '__FastSubmit' : 'true',
-        '__csrfToken' : '%s' % csrfToken
-    }
-    s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False)
-    time.sleep(5)
-    
-    # click edit proprities
-    data["actionString"] = "/click/%s/142_455#n" % main_frame_id
-    result = s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False).text
-    client_properties_dlg_id = re.findall("ClientPropertiesDlg_[0-9]{9,10}", result)[0]
-    print client_properties_dlg_id
-    time.sleep(3)
+    print "  total clients: %s" % (str(total_clients))
+    for i in range(0, total_clients):
+        y_value = 255 + i * 31
+        # click first client
+        data = {
+            'actionString' : '/click/%s/374_%s#n' % (main_frame_id, y_value),
+            '__Action' : 'v4',
+            '__FastSubmit' : 'true',
+            '__csrfToken' : '%s' % csrfToken
+        }
+        s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False)
+        time.sleep(5)
+        
+        # click edit proprities
+        data["actionString"] = "/click/%s/142_455#n" % main_frame_id
+        result = s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False).text
+        client_properties_dlg_id = re.findall("ClientPropertiesDlg_[0-9]{9,10}", result)[0]
+        # print client_properties_dlg_id
+        time.sleep(3)
 
-    # click network
-    data["actionString"] = "/click/%s/108_48#n" % client_properties_dlg_id
-    result = s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False).text
-    IP_info = re.findall("[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}", result)[0]
-    Mac_info = re.findall(".{2}\-.{2}\-.{2}\-.{2}\-.{2}\-.{2}", result)[0]
-    print IP_info
-    print Mac_info
+        # click network
+        data["actionString"] = "/click/%s/108_48#n" % client_properties_dlg_id
+        result = s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False).text
+        IP_info = re.findall("[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}", result)[0]
+        Mac_info = re.findall(".{2}\-.{2}\-.{2}\-.{2}\-.{2}\-.{2}", result)[0]
+        print IP_info
+        print Mac_info
 
-    # click X
-    data["actionString"] = "/click/%s/503_15#n" % client_properties_dlg_id
-    result = s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False).text
+        # click X
+        data["actionString"] = "/click/%s/503_15#n" % client_properties_dlg_id
+        result = s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False).text
     
 
 
