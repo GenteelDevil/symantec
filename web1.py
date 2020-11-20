@@ -215,7 +215,7 @@ def GenClientsInfo(csrfToken):
     online_clients = 0
     offline_clients = 0
     while True:
-        result = s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False)
+        result = s.post(post_url, data=data, headers=headers, verify=False)
         online_clients = re.findall("[On]{1}\w+line", result.text)
         offline_clients = re.findall("[Offlien]{1}\w+line", result.text)
         if len(online_clients) == 0:
@@ -225,13 +225,38 @@ def GenClientsInfo(csrfToken):
             online_clients = len(online_clients)
             offline_clients = len(offline_clients)
             break
-    
+    print "  total clients: %s" % (str(online_clients + offline_clients))
     # 2. get Clients info
     print "2. get clients info"
+    # click first client
+    data = {
+        'actionString' : '/click/%s/374_255#n' % main_frame_id,
+        '__Action' : 'v4',
+        '__FastSubmit' : 'true',
+        '__csrfToken' : '%s' % csrfToken
+    }
+    s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False)
+    time.sleep(5)
+    
+    # click edit proprities
+    data["actionString"] = "/click/%s/142_455#n" % main_frame_id
+    result = s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False).text
+    client_properties_dlg_id = re.findall("ClientPropertiesDlg_[0-9]{9,10}", result)[0]
+    print client_properties_dlg_id
+    time.sleep(3)
 
+    # click network
+    data["actionString"] = "/click/%s/108_48#n" % client_properties_dlg_id
+    result = s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False).text
+    IP_info = re.findall("[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}", result)[0]
+    Mac_info = re.findall(".{2}\-.{2}\-.{2}\-.{2}\-.{2}\-.{2}", result)[0]
+    print IP_info
+    print Mac_info
 
-
-
+    # click X
+    data["actionString"] = "/click/%s/503_15#n" % client_properties_dlg_id
+    result = s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False).text
+    
 
 
     
