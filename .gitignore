@@ -2,3 +2,4 @@ venv/
 .vscode/
 *.zip
 test.json
+test.html
