@@ -10,6 +10,7 @@ import json
 import string
 import random
 from bs4 import BeautifulSoup
+from requests.models import ContentDecodingError
 
 #login_url="https://"+ +"/console/apps/sepm"
 #login_url_default="https://"+ +":8443/console/apps/sepm"
@@ -204,7 +205,7 @@ def GenClientsInfo(csrfToken):
 
     # 1. click clients
     print "1. click Clients"
-    # print main_frame_id
+    # click clients
     data = {
         'actionString' : '/click/%s/33_383#n' % main_frame_id,
         '__Action' : 'v4',
@@ -213,9 +214,19 @@ def GenClientsInfo(csrfToken):
     }
     s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False)
     time.sleep(2)
-    # update global
-    data['actionString'] = "/update/global"
-    s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False)
+
+    # update
+    data['actionString'] = '/iframe/null/loaded'
+    respon_json = json.loads(s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False).text)
+    while not respon_json.has_key("actionableComponentStates"):
+        time.sleep(1)
+        respon_json = json.loads(s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False).text)
+    contents = respon_json["actionableComponentStates"]
+    print contents
+    time.sleep(2)
+
+
+
     
     # 2. get Clients info
     print "2. get clients info"
