@@ -202,37 +202,24 @@ def GenClientsInfo(csrfToken):
     response_json = s.post(post_url, data=data, headers=headers, verify=False).text
     main_frame_id = json.loads(response_json)["activeWindowId"]
 
-    # 1. click admin
-    print "1. click Admin"
+    # 1. click clients
+    print "1. click Clients"
     # print main_frame_id
-    body_data1 = {
-        'actionString' : '/click/%s/31_453#n' % main_frame_id,
+    data = {
+        'actionString' : '/click/%s/33_383#n' % main_frame_id,
         '__Action' : 'v4',
         '__FastSubmit' : 'true',
         '__csrfToken' : '%s' % csrfToken
     }
-    s.post(post_url, data=body_data1, headers=headers, verify=False)
+    s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False)
     time.sleep(2)
+    # update global
+    data['actionString'] = "/update/global"
+    s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False)
+    
+    # 2. get Clients info
+    print "2. get clients info"
 
-    print "2. click install package"
-    data = {
-        'actionString' : '/click/%s/113_897#n' % main_frame_id,
-        '__Action' : 'v4',
-        '__FastSubmit' : 'true',
-        '__csrfToken' : csrfToken
-    }
-
-    data1 = {
-        'actionString' : '/update/global/',
-        '__Action' : 'v4',
-        '__FastSubmit' : 'true',
-        '__csrfToken' : csrfToken
-    }
-
-    s.post(post_url, data=data, headers=headers, verify=False)
-    time.sleep(2)
-    s.post(post_url, data=data1, headers=headers, verify=False)
-    time.sleep(2)
 
 
 
@@ -240,7 +227,7 @@ def GenClientsInfo(csrfToken):
     
 if __name__ == '__main__':
     csrfToken,componentId=get_login_sessions()
-    upload_file(csrfToken=csrfToken)
+    GenClientsInfo(csrfToken=csrfToken)
     #test_upload_file()
     while True:
         time.sleep(1)
