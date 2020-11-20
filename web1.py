@@ -8,15 +8,16 @@ import re
 import json
 import string
 import random
+import sys
 from bs4 import BeautifulSoup
 from requests.models import ContentDecodingError, to_native_string
 
 #login_url="https://"+ +"/console/apps/sepm"
 #login_url_default="https://"+ +":8443/console/apps/sepm"
-login_username=""
-login_password=""
+login_username="admin"
+login_password="Admin@123"
 
-file_path = "./"
+file_path = "./clients_info.txt"
 
 main_frame = ""
 #default setting
@@ -134,7 +135,7 @@ def get_login_sessions():
     }
     login_data_3["__csrfToken"]=csrfToken
     login_data_3["actionString"]="/keydown/"+JTextField+"/n_9_1"
-    login_data_3["storedActions[]"]="/type/"+JTextField+"/admin"
+    login_data_3["storedActions[]"]="/type/"+JTextField+"/%s" % login_username
     req_login_3=s.post(default_url_local_2,data=login_data_3,proxies={},headers=headers,verify=False)
     time.sleep(2)
 
@@ -144,7 +145,7 @@ def get_login_sessions():
     }
     login_data_4["__csrfToken"]=csrfToken
     login_data_4["actionString"]="/keydown/"+SEPMPasswordField+"/n_13_1"
-    login_data_4["storedActions[]"]="/type/"+SEPMPasswordField+"/Admin@123"
+    login_data_4["storedActions[]"]="/type/"+SEPMPasswordField+"/%s" % login_password
     login_data_4=s.post(default_url_local_2,data=login_data_4,proxies={},headers=headers,verify=False)
     time.sleep(15)
 
@@ -159,14 +160,15 @@ def get_login_sessions():
                     PHPSESSID=j
                     PHPSESSID=PHPSESSID.encode("utf-8")
     else :
-        print "not find PHPSESSID!"
+        print "not find PHPSESSID! try later"
+        sys.exit()
     
     login_data_6=s.get(PHPSESSID_url,headers=headers,verify=False)
-    print "cookies info:"
-    print "  cookieTest=true;%s;ssc=1;%s"%(JSESSIONID,PHPSESSID)
-    print "BodyInfo:"
-    print "  csrfToken=%s" % csrfToken
-    print "  MainFrameID=%s" % main_frame
+    # print "cookies info:"
+    # print "  cookieTest=true;%s;ssc=1;%s"%(JSESSIONID,PHPSESSID)
+    # print "BodyInfo:"
+    # print "  csrfToken=%s" % csrfToken
+    # print "  MainFrameID=%s" % main_frame
     return csrfToken,componentId
 
 def keep_alive(csrfToken):
@@ -191,10 +193,13 @@ def GenClientsInfo(csrfToken):
     }
     response_json = s.post(post_url, data=data, headers=headers, verify=False).text
     quick_start_dialog_id = json.loads(response_json)['activeWindowId']
-    print quick_start_dialog_id
+    if quick_start_dialog_id == None:
+        print "quick_start_dialog_id not found, try again"
+        sys.exit()
+    # print quick_start_dialog_id
 
     # 0. close start window
-    print "0. close start window"
+    # print "0. close start window"
     data = {
         'actionString' : '/click/%s/562_707#n' % quick_start_dialog_id,
         '__Action' : 'v4',
@@ -205,7 +210,7 @@ def GenClientsInfo(csrfToken):
     main_frame_id = json.loads(response_json)["activeWindowId"]
 
     # 1. click clients
-    print "1. click Clients"
+    # print "1. click Clients"
     # click clients
     data = {
         'actionString' : '/click/%s/33_383#n' % main_frame_id,
@@ -230,8 +235,10 @@ def GenClientsInfo(csrfToken):
     total_clients = (online_clients + offline_clients) / 4
 
     # 2. get Clients info
-    print "2. get clients info"
-    print "  total clients: %s" % (str(total_clients))
+    # print "2. get clients info"
+    print "total clients: %s" % (str(total_clients))
+    f = open('test.txt', 'w+')
+    f.write("total clients: %s" % (str(total_clients)))
     for i in range(0, total_clients):
         y_value = 255 + i * 31
         # click first client
@@ -248,6 +255,8 @@ def GenClientsInfo(csrfToken):
         data["actionString"] = "/click/%s/142_455#n" % main_frame_id
         result = s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False).text
         client_properties_dlg_id = re.findall("ClientPropertiesDlg_[0-9]{9,10}", result)[0]
+        Anti_version = re.findall("[0-9]*\.[0-9]*\.[0-9]*\.[0-9]{4}", result)[0]
+        
         # print client_properties_dlg_id
         time.sleep(3)
 
@@ -256,21 +265,28 @@ def GenClientsInfo(csrfToken):
         result = s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False).text
         IP_info = re.findall("[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}", result)[0]
         Mac_info = re.findall(".{2}\-.{2}\-.{2}\-.{2}\-.{2}\-.{2}", result)[0]
-        print IP_info
-        print Mac_info
+        
+        # print IP_info
+        # print Mac_info
+
+        f.write("client %s:\n" % str(i + 1))
+        f.write("  IP : %s\n" % IP_info)
+        f.write("  MAC: %s\n" % Mac_info)
+        f.write("  Version: %s\n" % Anti_version)
+
+        print "client %s:" % str(i + 1)
+        print "  IP : %s" % IP_info
+        print "  MAC: %s" % Mac_info
+        print "  Version: %s" % Anti_version
+
 
         # click X
         data["actionString"] = "/click/%s/503_15#n" % client_properties_dlg_id
         result = s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False).text
-    
+    f.close()
 
 
     
 if __name__ == '__main__':
     csrfToken,componentId=get_login_sessions()
     GenClientsInfo(csrfToken=csrfToken)
-    #test_upload_file()
-    while True:
-        time.sleep(1)
-        keep_alive(csrfToken=csrfToken)
-    
