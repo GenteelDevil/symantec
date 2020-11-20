@@ -177,7 +177,7 @@ def keep_alive(csrfToken):
     }
     s.post(post_url, data=data, headers=headers, verify=False)
 
-def upload_file(csrfToken):
+def GenClientsInfo(csrfToken):
     post_url = "https://%s:8443/console/apps/sepm" % server_ip
     # get QuickStart window ID
 
@@ -235,100 +235,7 @@ def upload_file(csrfToken):
     time.sleep(2)
 
 
-    print "3. click add package"
 
-    data = {
-        'actionString' : '/click/%s/190_612#n' % main_frame_id,
-        '__Action' : 'v4',
-        '__FastSubmit' : 'true',
-        '__csrfToken' : csrfToken
-    }
-
-    response_json = s.post(post_url, data=data, headers=headers, verify=False).text
-    creat_new_software_dlg_id = json.loads(response_json)['activeWindowId']
-    jtext_field_id = json.loads(response_json)['focusedComponentId']
-
-    print jtext_field_id
-    print creat_new_software_dlg_id
-
-    print "4. input package name"
-    # click input box
-    data = {
-        'actionString' : '/click/%s/73_77#n' % creat_new_software_dlg_id,
-        'postActions[]' : '/caret/%s/0' % jtext_field_id,
-        '__Action' : 'v4',
-        '__FastSubmit' : 'true',
-        '__csrfToken' : csrfToken
-    }
-
-    # input package name
-    data = {
-        'actionString' : '/noupdate/%s/' % jtext_field_id,
-        'storedActions[]' : '/type/%s/thisisatestpackage' % jtext_field_id,
-        '__Action' : 'v4',
-        '__FastSubmit' : 'true',
-        '__csrfToken' : csrfToken
-    }
-    s.post(post_url, data=data, headers=headers, verify=False)
-
-    print "5. create select file windows"
-    data = {
-        'actionString' : '/click/%s/295_133#n' % creat_new_software_dlg_id,
-        '__Action' : 'v4',
-        '__FastSubmit' : 'true',
-        '__csrfToken' : csrfToken
-    }
-    result = s.post(post_url, data=data, headers=headers, verify=False).text
-    jfile_choose_id = re.findall("JFileChooser\_[0-9]{9,10}", result)
-    jfile_choose_id = str(jfile_choose_id[0])
-    print jfile_choose_id
-    
-    print "6. upload file cache"
-    # change headers
-    chars = string.letters + string.digits
-    rand_str = ''.join([random.choice(chars) for i in range(16)])
-    tmp_header = {
-        "Connection" : "close",
-        "Cache-Control" : "max-age=0",
-        "Upgrade-Insecure-Requests" : "1",
-        "Content-Type" : "multipart/form-data; boundary=----WebKitFormBoundary%s" % rand_str,
-        "User-Agent" : "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36",
-        "Accept" : "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-        "Sec-Fetch-Site" : "same-origin",
-        "Sec-Fetch-Mode" : "navigate",
-        "Sec-Fetch-User" : "?1",
-        "Sec-Fetch-Dest" : "document",
-        "Accept-Encoding" : "gzip, deflate",
-        "Accept-Language" : "en-US,en;q=0.5"
-    }
-    headers['Content-Type'] = 'multipart/form-data; boundary=----WebKitFormBoundary%s' % rand_str
-    files = {
-        "upload.file" : (
-            "type-1.zip",
-            open('./type-1.zip', 'rb'),
-            "application/zip"
-        )
-    }
-    datas = {
-        "__csrfToken" : (csrfToken),
-        jtext_field_id : ("thisisatestpackage"),
-        "actionString" : ("/upload/%s/ok" % jfile_choose_id[0])
-    }
-    s.post(post_url, data=datas, files=files, proxies=proxies, headers=headers, verify=False)
-
-def test_upload_file():
-    files = {
-        "upload.file" : (
-            "type-1.zip",
-            open('./type-1.zip', 'rb'),
-            "application/zip"
-        )
-    }
-    data = {
-        "__csrfToken" : (""),
-        "actionString" : ("/upload/")
-    }
-    s.post(default_url_local_2, data=data, files=files, proxies=proxies, headers=headers, verify=False)
 
     
 if __name__ == '__main__':
