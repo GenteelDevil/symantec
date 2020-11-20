@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-from re import match
 import requests
 import urllib
 import time
@@ -10,7 +9,7 @@ import json
 import string
 import random
 from bs4 import BeautifulSoup
-from requests.models import ContentDecodingError
+from requests.models import ContentDecodingError, to_native_string
 
 #login_url="https://"+ +"/console/apps/sepm"
 #login_url_default="https://"+ +":8443/console/apps/sepm"
@@ -212,24 +211,24 @@ def GenClientsInfo(csrfToken):
         '__FastSubmit' : 'true',
         '__csrfToken' : '%s' % csrfToken
     }
-    s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False)
-    time.sleep(2)
-
-    # update
-    data['actionString'] = '/iframe/null/loaded'
-    respon_json = json.loads(s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False).text)
-    while not respon_json.has_key("actionableComponentStates"):
-        time.sleep(1)
-        respon_json = json.loads(s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False).text)
-    contents = respon_json["actionableComponentStates"]
-    print contents
-    time.sleep(2)
-
-
-
+    clients_num = 0
+    online_clients = 0
+    offline_clients = 0
+    while True:
+        result = s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False)
+        online_clients = re.findall("[On]{1}\w+line", result.text)
+        offline_clients = re.findall("[Offlien]{1}\w+line", result.text)
+        if len(online_clients) == 0:
+            time.sleep(5)
+            continue
+        else:
+            online_clients = len(online_clients)
+            offline_clients = len(offline_clients)
+            break
     
     # 2. get Clients info
     print "2. get clients info"
+
 
 
 
