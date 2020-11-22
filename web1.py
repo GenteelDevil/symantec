@@ -248,12 +248,12 @@ def GenClientsInfo(csrfToken):
             '__FastSubmit' : 'true',
             '__csrfToken' : '%s' % csrfToken
         }
-        s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False)
+        s.post(post_url, data=data, proxies={}, headers=headers, verify=False)
         time.sleep(5)
         
         # click edit proprities
         data["actionString"] = "/click/%s/142_455#n" % main_frame_id
-        result = s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False).text
+        result = s.post(post_url, data=data, proxies={}, headers=headers, verify=False).text
         client_properties_dlg_id = re.findall("ClientPropertiesDlg_[0-9]{9,10}", result)[0]
         Anti_version = re.findall("[0-9]*\.[0-9]*\.[0-9]*\.[0-9]{4}", result)[0]
         
@@ -262,7 +262,7 @@ def GenClientsInfo(csrfToken):
 
         # click network
         data["actionString"] = "/click/%s/108_48#n" % client_properties_dlg_id
-        result = s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False).text
+        result = s.post(post_url, data=data, proxies={}, headers=headers, verify=False).text
         IP_info = re.findall("[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}", result)[0]
         Mac_info = re.findall(".{2}\-.{2}\-.{2}\-.{2}\-.{2}\-.{2}", result)[0]
         
@@ -282,7 +282,7 @@ def GenClientsInfo(csrfToken):
 
         # click X
         data["actionString"] = "/click/%s/503_15#n" % client_properties_dlg_id
-        result = s.post(post_url, data=data, proxies=proxies, headers=headers, verify=False).text
+        result = s.post(post_url, data=data, proxies={}, headers=headers, verify=False).text
     f.close()
 
 
