@@ -236,8 +236,10 @@ def GenClientsInfo(csrfToken):
 
     # 2. get Clients info
     # print "2. get clients info"
+    print "Server IP: %s" % server_ip
     print "total clients: %s" % (str(total_clients))
     f = open('test.txt', 'w+')
+    f.write("Server IP: %s" % server_ip)
     f.write("total clients: %s" % (str(total_clients)))
     for i in range(0, total_clients):
         y_value = 255 + i * 31
