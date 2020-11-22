@@ -3,3 +3,4 @@ venv/
 *.zip
 test.json
 test.html
+test.txt
